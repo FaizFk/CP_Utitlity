@@ -1,0 +1,60 @@
+// KosaRaju Algorithm
+
+void dfs2(int u, vector<int> adj[], int visited[], vector<int> &vec)
+{
+    vec.push_back(u);
+    visited[u] = 1;
+    for (int v : adj[u])
+    {
+        if (!visited[v])
+        {
+            dfs2(v, adj, visited, vec);
+        }
+    }
+}
+
+void dfs(int u, vector<int> adj[], int visited[], stack<int> &st)
+{
+    visited[u] = 1;
+    for (int v : adj[u])
+    {
+        if (!visited[v])
+            dfs(v, adj, visited, st);
+    }
+    st.push(u);
+}
+
+vector<vector<int>> countStronglyConnectedComponents(vector<int> adj[], int &n)
+{
+    vector<int> radj[n + 1];
+    int visited[n + 1] = {0};
+    stack<int> st;
+    for (int i = 1; i <= n; i++)
+    {
+        if (!visited[i])
+        {
+            dfs(i, adj, visited, st);
+        }
+
+        for (int v : adj[i])
+        {
+            radj[v].push_back(i);
+        }
+    }
+
+    memset(visited, 0, sizeof visited);
+    vector<vector<int>> ans;
+    while (!st.empty())
+    {
+        int i = st.top();
+        st.pop();
+        if (!visited[i])
+        {
+            vector<int> v;
+            dfs2(i, radj, visited, v);
+            ans.push_back(v);
+        }
+    }
+
+    return ans;
+}
