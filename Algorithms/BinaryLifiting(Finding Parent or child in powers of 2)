@@ -1,0 +1,26 @@
+int pow2child[n + 1][31] = {0};
+
+for (int i = 1; i <= n; i++)
+{
+    //First child of u is v
+    cin >> pow2child[i][0];
+}
+
+for (int i = 1; i <= 30; i++)
+{
+    for (int u = 1; u <= n; u++)
+    {
+        pow2child[u][i] = pow2child[pow2child[u][i - 1]][i - 1];
+    }
+}
+
+//Finding the kth child
+for (int i = 0; i <= 30; i++)
+{
+    if ((k >> i) & 1)
+    {
+        u = pow2child[u][i];
+    }
+}
+ 
+cout << u << endl;
