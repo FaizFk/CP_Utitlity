@@ -1,0 +1,53 @@
+class DisjointSetUnion
+{
+    vector<int> size, parent;
+    set<int> comps;
+
+public:
+    DisjointSetUnion(int n)
+    {
+        size.resize(n + 1, 1);
+        parent.resize(n + 1, 0);
+        for (int i = 1; i <= n; i++)
+        {
+            parent[i] = i;
+            comps.insert(i);
+        }
+    }
+
+    int findParent(int u)
+    {
+        if (u == parent[u])
+            return u;
+
+        return parent[u] = findParent(parent[u]);
+    }
+
+    void unionbysize(int u, int v)
+    {
+        int urep = findParent(u);
+        int vrep = findParent(v);
+
+        if (urep == vrep)
+            return;
+            
+        if (size[urep] < size[vrep])
+        {
+            parent[urep] = vrep;
+            size[vrep] += size[urep];
+            comps.erase(urep);
+        }
+        else
+        {
+            parent[vrep] = urep;
+            size[urep] += size[vrep];
+            comps.erase(vrep);
+        }
+    }
+
+    int countComps()
+    {
+        return comps.size();
+    }
+
+};
