@@ -1,0 +1,77 @@
+class SegmentTree
+{
+    vector<ll> tree;
+    int size = 5;
+
+public:
+    SegmentTree(vector<int> arr)
+    {
+        while (__builtin_popcount(arr.size()) != 1)
+        {
+            // operation specific
+            arr.push_back(0);
+        }
+
+        int n = arr.size();
+        size = n - 1;
+        tree.resize(2 * n);
+
+        for (int i = 0; i < n; i++)
+        {
+            tree[n + i] = arr[i];
+        }
+
+        for (int i = n - 1; i >= 1; i--)
+        {
+            // operation specific
+            tree[i] = tree[2 * i] + tree[2 * i + 1];
+        }
+    }
+
+    ll query(int query_low, int query_high)
+    {
+        return query(1, 0, size, query_low, query_high);
+    }
+
+    ll query(int node, int node_low, int node_high, int query_low, int query_high)
+    {
+        if (query_low <= node_low && node_high <= query_high)
+            return tree[node];
+
+        // operation specific
+        if (node_high < query_low || query_high < node_low)
+            return 0;
+
+        int mid = (node_low + node_high) >> 1;
+
+        // operation specific
+        return query(2 * node, node_low, mid, query_low, query_high) +
+               query(2 * node + 1, mid + 1, node_high, query_low, query_high);
+    }
+
+    void update(int query_low, int query_high, int v)
+    {
+        update(1, 0, size, query_low, query_high, v);
+    }
+
+    void update(int node, int node_low, int node_high, int query_low, int query_high, int v)
+    {
+        if (query_low <= node_low && node_high <= query_high)
+        {
+            // operation specific
+            tree[node]+= v;
+            return;
+        }
+
+        if (node_high < query_low || query_high < node_low)
+            return;
+
+        int mid = (node_low + node_high) >> 1;
+
+        update(2 * node, node_low, mid, query_low, query_high, v);
+        update(2 * node + 1, mid + 1, node_high, query_low, query_high, v);
+
+        // operation specific
+        tree[node] = tree[2 * node] + tree[2 * node + 1];
+    }
+};
