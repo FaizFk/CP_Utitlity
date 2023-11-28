@@ -58,7 +58,7 @@ public:
     {
         if (query_low <= node_low && node_high <= query_high)
         {
-            // operation specific
+            // operation specific and question specific
             tree[node]+= v;
             return;
         }
