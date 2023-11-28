@@ -49,9 +49,9 @@ public:
                query(2 * node + 1, mid + 1, node_high, query_low, query_high);
     }
 
-    void update(int query_low, int query_high, int v)
+    void update(int index, int v)
     {
-        update(1, 0, size, query_low, query_high, v);
+        update(1, 0, size, index,index, v);
     }
 
     void update(int node, int node_low, int node_high, int query_low, int query_high, int v)
