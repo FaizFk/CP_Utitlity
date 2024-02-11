@@ -7,7 +7,7 @@ class SegmentTree
     int size = 127;
 
 public:
-    SegmentTree(vector<int> arr)
+    SegmentTree(vector<ll> arr)
     {
         while (__builtin_popcount(arr.size()) != 1)
         {
@@ -93,12 +93,12 @@ public:
                query(2 * node + 1, mid + 1, node_high, query_low, query_high);
     }
 
-    void update(int query_left, int query_right, int v, int assign = 0)
+    void update(int query_left, int query_right, ll v, int assign = 0)
     {
         update(1, 0, size, query_left, query_right, v, assign);
     }
 
-    void update(int node, int node_low, int node_high, int query_low, int query_high, int v, int assign)
+    void update(int node, int node_low, int node_high, int query_low, int query_high, ll v, int assign)
     {
         propogate(node, node_low, node_high);
         if (node_high < query_low || query_high < node_low)
