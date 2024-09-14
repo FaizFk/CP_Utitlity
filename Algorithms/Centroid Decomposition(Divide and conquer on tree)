@@ -1,0 +1,133 @@
+//This question was to find sum of distance of all pair of nodes having same color
+//It might need some refinement, I did all on my own, but can be studied to get some idea on centroid decomposition
+
+#include <bits/stdc++.h>
+#define ll long long
+using namespace std;
+
+int main()
+{
+
+    int n;
+    cin >> n;
+    vector<vector<int>> adj(n + 1);
+    for (int i = 0; i < n - 1; i++)
+    {
+        int u, v;
+        cin >> u >> v;
+
+        adj[u].push_back(v);
+        adj[v].push_back(u);
+    }
+
+    vector<int> color(n + 1, 0);
+    for (int i = 1; i <= n; i++)
+    {
+        cin >> color[i];
+    }
+
+    auto dfs2 = [&](auto &&dfs2, int u, int par, map<int, int> &sz) -> void
+    {
+        sz[u] = 1;
+        for (int v : adj[u])
+        {
+            if (v == par)
+                continue;
+
+            dfs2(dfs2, v, u, sz);
+
+            sz[u] += sz[v];
+        }
+    };
+
+    auto getCentroid = [&](auto &&getCentroid, int u, int par, int &totSize, map<int, int> &sz) -> int
+    {
+        for (int v : adj[u])
+        {
+            if (v == par)
+            {
+                continue;
+            }
+
+            if (sz[v] * 2 > totSize)
+            {
+                return getCentroid(getCentroid, v, u, totSize, sz);
+            }
+        }
+        return u;
+    };
+
+    // from centroid we will do dfs to get distance of all nodes
+    auto dfs = [&](auto &&dfs, int u, int par, int depth, map<int, int> &dist, map<int, int> &cnt, int &idx) -> void
+    {
+        dist[u] = depth;
+        cnt[color[u]]++;
+
+        for (int i = 0; i < adj[u].size(); i++)
+        {
+            int v = adj[u][i];
+            if (v == par)
+            {
+                if (depth == 1)
+                    idx = i;
+                continue;
+            }
+
+            dfs(dfs, v, u, depth + 1, dist, cnt, idx);
+        }
+    };
+
+    auto solve = [&](auto &&solve, int u) -> ll
+    {
+        map<int, int> sz;
+        dfs2(dfs2, u, 0, sz);
+        int totSize = sz[u];
+        u = getCentroid(getCentroid, u, 0, totSize, sz);
+
+        //cout << u << '\n';
+
+        ll ans = 0;
+        map<int, int> totCnt;
+        map<int, ll> colDistSum;
+        for (int v : adj[u])
+        {
+            map<int, int> dist;
+            map<int, int> cnt;
+            int idx = 0;
+            dfs(dfs, v, u, 1, dist, cnt, idx);
+
+            for (auto x : dist)
+            {
+                int vv = x.first, d = x.second;
+
+                ans += (ll)d * totCnt[color[vv]] + colDistSum[color[vv]];
+                if (color[vv] == color[u])
+                    ans += d;
+            }
+
+            for (auto x : cnt)
+            {
+                int col = x.first, freq = x.second;
+                totCnt[col] += freq;
+            }
+
+            for (auto x : dist)
+            {
+                int vv = x.first, d = x.second;
+                colDistSum[color[vv]] += d;
+            }
+
+            swap(adj[v][idx], adj[v][adj[v].size() - 1]);
+            adj[v].pop_back();
+        }
+
+        for (int v : adj[u])
+        {
+            ans += solve(solve, v);
+        }
+
+        return ans;
+    };
+
+    cout << solve(solve, 1) << '\n';
+}
