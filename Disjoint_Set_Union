@@ -1,7 +1,6 @@
 class DisjointSetUnion
 {
     vector<int> size, parent;
-    set<int> comps;
 
 public:
     DisjointSetUnion(int n)
@@ -11,7 +10,6 @@ public:
         for (int i = 1; i <= n; i++)
         {
             parent[i] = i;
-            comps.insert(i);
         }
     }
 
@@ -35,19 +33,12 @@ public:
         {
             parent[urep] = vrep;
             size[vrep] += size[urep];
-            comps.erase(urep);
         }
         else
         {
             parent[vrep] = urep;
             size[urep] += size[vrep];
-            comps.erase(vrep);
         }
-    }
-
-    int countComps()
-    {
-        return comps.size();
     }
 
 };
