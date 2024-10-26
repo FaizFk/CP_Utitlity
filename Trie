@@ -1,0 +1,41 @@
+//might need some edge cases detection though, still in early stage
+
+vector<vector<int>> next(1,vector<int>(26,0)), cntReach(1,vector<int>(26,0));
+vector<int> is_terminal(1,0);
+int N=0;
+
+auto insert=[&](string s)
+{
+    int node=0;
+    for(int i=0;i<s.size();i++)
+    {
+        if(next[node][s[i]-'a']==0)
+        {
+            next.push_back(vector<int>(26,0));
+            cntReach.push_back(vector<int>(26,0));
+            is_terminal.push_back(0);
+            next[node][s[i]-'a']=++N;
+        }
+
+        cntReach[node][s[i]-'a']++;
+        node=next[node][s[i]-'a'];
+        
+    }
+};
+
+//finds longest prefix s.t. atleast k strings have that prefix
+//just remove ans as parameter to get length only
+auto longestPrefK=[&](auto&& longestPrefK, int node, int k)->pair<int,string>
+{
+    pair<int,string> ans={0,""};
+    for(int i=0;i<26;i++)
+    {
+        if(next[node][i]!=0 && cntReach[node][i]>=k)
+        {
+            pair<int,string> p=longestPrefK(longestPrefK, next[node][i], k);
+            ans=max(ans,{p.first+1, (char)(i+'a')+p.second});
+        }
+    }
+
+    return ans;
+};
