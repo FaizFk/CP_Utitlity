@@ -24,7 +24,7 @@ auto insert=[&](string s)
 };
 
 //finds longest prefix s.t. atleast k strings have that prefix
-//just remove ans as parameter to get length only
+//just change code to get length only
 auto longestPrefK=[&](auto&& longestPrefK, int node, int k)->pair<int,string>
 {
     pair<int,string> ans={0,""};
