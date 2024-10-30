@@ -1,0 +1,41 @@
+vector<vector<int>> IDENTITY;
+
+    void makeIdentity(int n)
+    {
+        IDENTITY.assign(n,vector<int>(n,0));
+        for(int i=0;i<n;i++)
+            IDENTITY[i][i]=1;
+    }
+
+    vector<vector<int>> matMul(vector<vector<int>> mat1, vector<vector<int>> mat2)
+    {
+        int R1=mat1.size();
+        int R2 = mat2.size();
+        int C1=mat1[0].size();
+        int C2 = mat2[0].size();
+        vector<vector<int>> res(R1,vector<int>(C2,0));
+
+        for (int i = 0; i < R1; i++) {
+            for (int j = 0; j < C2; j++) {
+                for (int k = 0; k < R2; k++) {
+                    res[i][j] += mat1[i][k] * mat2[k][j];
+                }
+            }
+        }
+
+        return res;
+    }
+
+    vector<vector<int>> powOptMat(vector<vector<int>> x, int p)
+    {
+        if(p==0)
+            return IDENTITY;
+
+        vector<vector<int>> res = powOptMat(x, p/2);
+        res=matMul(res, res);
+
+        if(p&1)
+            res=matMul(res, x);
+
+        return res;        
+    }
