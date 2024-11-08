@@ -1,0 +1,107 @@
+struct Edge
+{
+    int from;
+    int to;
+    ll flow;
+    ll capacity;
+    int revEdgeIdx;
+
+    ll getRemainingCapacity()
+    {
+        return capacity - flow;
+    }
+};
+
+// Assuming source is 0-th and sink is (#nodes-1)-th
+class maxFlowDinic
+{
+public:
+    const ll INF = 1e18 + 12;
+    int n = 0;
+    vector<int> level;
+    vector<vector<Edge>> adj;
+    vector<int> start;
+
+    maxFlowDinic(int nodes)
+    {
+        n = nodes;
+        
+        //these resize :(
+        level.resize(n);
+        adj.resize(n);
+        start.resize(n, 0);
+    };
+
+    void addEdge(int u, int v, int w)
+    {
+        Edge ue = {u, v, 0, w, adj[v].size()};
+        Edge ve = {v, u, 0, 0, adj[u].size()};
+        adj[u].push_back(ue);
+        adj[v].push_back(ve);
+    }
+
+    int bfs()
+    {
+        start.assign(n, 0);
+        level.assign(n, -1);
+        queue<int> q;
+        q.push(0);
+        level[0] = 0;
+
+        while (!q.empty())
+        {
+            int u = q.front();
+            q.pop();
+
+            for (Edge &e : adj[u])
+            {
+                if (e.getRemainingCapacity() > 0 && level[e.to] == -1)
+                {
+                    q.push(e.to);
+                    level[e.to] = level[e.from] + 1;
+                }
+            }
+        }
+
+        if (level[n - 1] == -1)
+            return 0;
+
+        return 1;
+    }
+
+    ll dfs(int u, ll currFlow)
+    {
+        if (u == n - 1)
+            return currFlow;
+
+        for (; start[u] < adj[u].size(); start[u]++)
+        {
+            Edge &e = adj[u][start[u]];
+
+            if (level[e.to] == level[e.from] + 1 && e.getRemainingCapacity() > 0)
+            {
+                ll bottleNeck = dfs(e.to, min(currFlow, e.getRemainingCapacity()));
+                if (bottleNeck > 0)
+                {
+                    e.flow += bottleNeck;
+                    adj[e.to][e.revEdgeIdx].flow -= bottleNeck;
+                    return bottleNeck;
+                }
+            }
+        }
+
+        return 0;
+    }
+
+    ll getMaxFlow()
+    {
+        ll maxFlow = 0;
+        while (bfs())
+        {
+            while (ll ans = dfs(0, INF))
+                maxFlow += ans;
+        }
+
+        return maxFlow;
+    }
+};
