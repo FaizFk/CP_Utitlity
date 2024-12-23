@@ -2,31 +2,37 @@ const int MOD = 1e9 + 7;
 
 const int mxm = 1e6 + 1;
 int factorial[mxm] = {};
+int invFactorial[mxm] = {};
 
-int powerOpt(int a, int b)
+int powOpt(int a, int b)
 {
     if (b == 0)
         return 1;
-    ll ans = powerOpt(a, b / 2);
+    ll ans = powOpt(a, b / 2);
     (ans *= ans) %= MOD;
     if (b & 1)
         (ans *= a) %= MOD;
     return ans;
 }
 
-void setfact()
+void setFact()
 {
     factorial[0] = 1;
+    invFactorial[0] = 1;
     for (int i = 1; i < mxm; i++)
     {
         factorial[i] = ((ll)i * factorial[i - 1]) % MOD;
+        invFactorial[i] = powOpt(factorial[i], MOD-2);
     }
 }
 
-int nCrMod(int n, int r)
+int nCr(int n, int r)
 {
-    int inv1 = powerOpt(factorial[r], MOD - 2);
-    int inv2 = powerOpt(factorial[n - r], MOD - 2);
+    if(r>n)
+        return 0;
+            
+    int inv1 = invFactorial[r];
+    int inv2 = invFactorial[n-r];
 
     ll ans=((ll)inv1*inv2)%MOD;
     (ans*=factorial[n])%=MOD;
