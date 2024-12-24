@@ -1,0 +1,28 @@
+int ans = 0;
+auto dfs = [&](auto&&dfs, int u, int par)->int
+{
+    int maxHeight = -1, secondMaxHeight = -1;
+    for(int v:adj[u])
+    {
+        if(v==par)
+            continue;
+
+        int h = dfs(dfs, v, u);
+        if(h>maxHeight)
+        {
+            secondMaxHeight = maxHeight;
+            maxHeight = h;
+        }
+        else if(h>secondMaxHeight)
+            secondMaxHeight = h;
+    }
+
+    int candDiam = 0;
+    if(maxHeight!=-1)
+        candDiam+=1+maxHeight;
+    if(secondMaxHeight!=-1)
+        candDiam+=1+secondMaxHeight;    
+
+    ans = max(ans, candDiam);
+    return 1+maxHeight;
+};
