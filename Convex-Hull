@@ -1,0 +1,56 @@
+//This algorithm might need some edges cases check for collinear points, but I think it works great for now
+
+//gives ~area of triangle, postive and negative, note input order matters
+ll triangle(vector<int>& A, vector<int>& B, vector<int>& C)
+{
+    vector<int> v1 = {B[0]-A[0], B[1]-A[1]};
+    vector<int> v2 = {C[0]-A[0], C[1]-A[1]};
+
+    return v1[0]*v2[1] - v1[1]*v2[0];
+}
+
+vector<vector<int>> convexHull(vector<vector<int>>& points)
+{
+    int n = points.size();
+    if(n<=2)
+        return points;
+
+    sort(points.begin(), points.end());
+
+    vector<vector<int>> hull;
+    //first find upper-hull and then lower-hull
+    for(int rep=0;rep<2;rep++)
+    {
+        // a trick to always only consider new points in each repetition
+        int k = hull.size();
+        for(int i=0;i<n;i++)
+        {
+            vector<int> C = points[i];
+            while((int)hull.size()-k>=2)
+            {
+                vector<int> B = hull.end()[-1];
+                vector<int> A = hull.end()[-2];
+
+                if(triangle(A, B, C)>=0)
+                    break;
+
+                hull.pop_back();    
+            }
+            hull.push_back(C);
+        }
+
+        hull.pop_back();
+        reverse(points.begin(), points.end());
+    }
+
+    //check if upper-hull and lower-hull are equal, happens when all the points are collinear
+    int k = hull.size();
+    if(k>=2 && hull.end()[-1]==hull[1])
+    {
+        // A B C D C B
+        int m = (k-2)/2;
+        while(hull.size()>m+2)
+            hull.pop_back();
+    }
+    return hull;
+}
