@@ -1,13 +1,16 @@
 class DisjointSetUnion
 {
     vector<int> size, parent;
+    int n;
 
 public:
-    DisjointSetUnion(int n)
+    vector<vector<int>> clusters;
+    DisjointSetUnion(int N)
     {
-        size.resize(n + 1, 1);
-        parent.resize(n + 1, 0);
-        for (int i = 1; i <= n; i++)
+        size.resize(N, 1);
+        parent.resize(N, 0);
+        n = N;
+        for (int i = 0; i < N; i++)
         {
             parent[i] = i;
         }
@@ -28,7 +31,7 @@ public:
 
         if (urep == vrep)
             return;
-            
+
         if (size[urep] < size[vrep])
         {
             parent[urep] = vrep;
@@ -41,4 +44,21 @@ public:
         }
     }
 
+    // (might need some changes)better to call this functions once all the DSU operations are done
+    void make_clusters()
+    {
+        int N = -1;
+        vector<int> posParent(n, -1);
+        for (int i = 0; i < n; i++)
+        {
+            int par = findParent(i);
+            if (posParent[par] == -1)
+            {
+                clusters.push_back({});
+                posParent[par] = ++N;
+            }
+
+            clusters[posParent[par]].push_back(i);
+        }
+    };
 };
