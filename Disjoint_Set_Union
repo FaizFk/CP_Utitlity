@@ -24,7 +24,7 @@ public:
         return parent[u] = findParent(parent[u]);
     }
 
-    void unionbysize(int u, int v)
+    void unionBySize(int u, int v)
     {
         int urep = findParent(u);
         int vrep = findParent(v);
@@ -45,7 +45,7 @@ public:
     }
 
     // (might need some changes)better to call this functions once all the DSU operations are done
-    void make_clusters()
+    void makeClusters()
     {
         int N = -1;
         vector<int> posParent(n, -1);
