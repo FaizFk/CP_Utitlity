@@ -1,0 +1,103 @@
+//Here we we given some array of strings, and had to find the longestPrefix after removing each string arr[i]
+//for this what I did was either keep following the deleted_string or not follow it and directly return the answer
+
+vector<vector<int>> nxt(1, vector<int>(26, 0)), cntReach(1, vector<int>(26, 0));
+
+// dp[node] = {{val, i}} , if we are at some node number, then what are the maximum length of that prefix
+vector<vector<pair<int, int>>> dp(1);
+int N = 0;
+
+void insert(string &s)
+{
+    int node = 0;
+    for (int i = 0; i < s.size(); i++)
+    {
+        if (nxt[node][s[i] - 'a'] == 0)
+        {
+            nxt.push_back(vector<int>(26, 0));
+            cntReach.push_back(vector<int>(26, 0));
+            dp.push_back({});
+            nxt[node][s[i] - 'a'] = ++N;
+        }
+
+        cntReach[node][s[i] - 'a']++;
+        node = nxt[node][s[i] - 'a'];
+    }
+}
+
+void deleteString(string &s)
+{
+    int node = 0;
+    for (int i = 0; i < s.size(); i++)
+    {
+        cntReach[node][s[i] - 'a']--;
+        node = nxt[node][s[i] - 'a'];
+    }
+}
+
+int initPref(int node, int &k)
+{
+    for (int i = 0; i < 26; i++)
+    {
+        if (nxt[node][i] != 0 && cntReach[node][i] >= k)
+        {
+            int p = initPref(nxt[node][i], k);
+            dp[node].push_back({p + 1, i});
+        }
+    }
+
+    sort(dp[node].begin(), dp[node].end(), greater<pair<int, int>>());
+
+    if (dp[node].size() == 0)
+        return 0;
+
+    return dp[node][0].first;
+}
+
+int longestPrefKStrict(int node, int idx, int &k, string &s)
+{
+    if (idx == s.size())
+    {
+        if(dp[node].size()==0)
+            return 0;
+        return dp[node][0].first;
+    }
+
+    //we can either keep following this trajectory, or return the maximum answer
+    int ans = 0;
+    for (auto &[len, j] : dp[node])
+    {
+        if (nxt[node][j] == 0 || cntReach[node][j] < k)
+            continue;
+
+        if (j == s[idx] - 'a')
+            continue;
+
+        ans = len;
+        break;
+    }
+
+    int i = s[idx] - 'a';
+    if (nxt[node][i] != 0 && cntReach[node][i] >= k + 1)
+        ans = max(ans, 1 + longestPrefKStrict(nxt[node][i], idx + 1, k, s));
+
+    return ans;
+}
+
+vector<int> longestCommonPrefix(vector<string> &words, int k)
+{
+    const int n = words.size();
+    for (int i = 0; i < n; i++)
+        insert(words[i]);
+
+    initPref(0, k);
+    vector<int> ans(n, 0);
+
+    for (int i = 0; i < n; i++)
+    {
+        // let's first strictly follow words[i], and calculate maxPrefLength,
+        // let's not follow words[i], and find maxPrefLength
+        ans[i] = longestPrefKStrict(0, 0, k, words[i]);
+    }
+    return ans;
+}
