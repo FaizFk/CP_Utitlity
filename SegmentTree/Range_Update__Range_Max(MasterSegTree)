@@ -1,0 +1,98 @@
+class SegmentTree
+{
+    vector<ll> tree, lazy, assignflag;
+    int size;
+
+public:
+    SegmentTree(vector<int> arr)
+    {
+        // operation specific
+        while (__builtin_popcount(arr.size()) != 1)
+            arr.push_back(0);
+        size = arr.size() - 1;
+        int n = arr.size();
+
+        tree.assign(2 * n, 0);
+        lazy.assign(2 * n, 0);
+        assignflag.assign(2 * n, 0);
+
+        for (int i = 0; i < n; i++)
+            tree[n + i] = arr[i];
+
+        // operation specific
+        for (int i = n - 1; i > 0; i--)
+            tree[i] = max(tree[2 * i], tree[2 * i + 1]);
+    }
+
+    // when using other operations like max or min, then
+    // tree[node] should not be lazy[node] * (high - low + 1) (as this is for addition);
+    void propagate(int node, int low, int high)
+    {
+        if (assignflag[node])
+        {
+            // tree[node] = lazy[node] * (high - low + 1);
+            tree[node] = lazy[node];
+            if (low != high)
+            {
+                lazy[2 * node] = lazy[2 * node + 1] = lazy[node];
+                assignflag[2 * node] = assignflag[2 * node + 1] = 1;
+            }
+        }
+        else
+        {
+            // tree[node] += lazy[node] * (high - low + 1);
+            tree[node] += lazy[node];
+            if (low != high)
+            {
+                lazy[2 * node] += lazy[node];
+                lazy[2 * node + 1] += lazy[node];
+            }
+        }
+        lazy[node] = assignflag[node] = 0;
+    }
+
+    ll query(int l, int r)
+    {
+        return query(1, 0, size, l, r);
+    }
+
+    ll query(int node, int low, int high, int l, int r)
+    {
+        propagate(node, low, high);
+        if (high < l || r < low)
+            return 0;
+        if (l <= low && high <= r)
+            return tree[node];
+        int mid = (low + high) / 2;
+
+        // operation specific
+        return max(query(2 * node, low, mid, l, r), query(2 * node + 1, mid + 1, high, l, r));
+    }
+
+    void update(int l, int r, ll v, int assign = 0)
+    {
+        update(1, 0, size, l, r, v, assign);
+    }
+
+    void update(int node, int low, int high, int l, int r, ll v, int assign)
+    {
+        propagate(node, low, high);
+        if (high < l || r < low)
+            return;
+
+        if (l <= low && high <= r)
+        {
+            lazy[node] = assign ? v : lazy[node] + v;
+            assignflag[node] = assign;
+            propagate(node, low, high);
+            return;
+        }
+
+        int mid = (low + high) / 2;
+        update(2 * node, low, mid, l, r, v, assign);
+        update(2 * node + 1, mid + 1, high, l, r, v, assign);
+
+        // operation specific
+        tree[node] = max(tree[2 * node], tree[2 * node + 1]);
+    }
+};
