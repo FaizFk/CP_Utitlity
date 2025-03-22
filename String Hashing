@@ -1,0 +1,35 @@
+const int cntHash = 2;
+vector<int> hashers = {2, 31};
+vector<vector<ll>> prefHash(cntHash, vector<ll>(n, 0)), suffHash(cntHash, vector<ll>(n, 0));
+vector<vector<ll>> powHash(cntHash, vector<ll>(n, 0));
+
+for(int i=0;i<cntHash;i++)
+{
+    prefHash[i][0] = s[0]-'a';
+    suffHash[i][n-1] = s[n-1]-'a';
+    powHash[i][0] = 1;
+    for(int j=1;j<n;j++)
+    {
+        prefHash[i][j] = (prefHash[i][j-1]*hashers[i]%MOD + s[j]-'a')%MOD;
+        suffHash[i][n-j-1] = (suffHash[i][n-j]*hashers[i]%MOD + s[n-j-1]-'a')%MOD;
+        powHash[i][j] = powHash[i][j-1]*hashers[i]%MOD;
+    }
+}    
+
+auto getHash = [&](int l, int r, int hasherIdx)
+{
+    int hash = prefHash[hasherIdx][r] - (l==0?0:prefHash[hasherIdx][l-1]*powHash[hasherIdx][r-l+1]%MOD);
+    if(hash<0)
+        (hash+=MOD)%=MOD;
+
+    return hash;    
+};
+
+auto getReverseHash=[&](int l, int r, int hasherIdx)
+{
+    int hash = suffHash[hasherIdx][l] - (r==n-1?0:suffHash[hasherIdx][r+1]*powHash[hasherIdx][r-l+1]%MOD);
+    if(hash<0)
+        (hash+=MOD)%=MOD;
+
+    return hash;    
+};
