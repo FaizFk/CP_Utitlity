@@ -1,0 +1,199 @@
+//check if patterns are present in given string or not?
+//had to use suffix array sort
+
+
+#include <bits/stdc++.h>
+#define ll long long
+using namespace std;
+
+const int MOD = 1e9 + 7;
+
+void countingSort(const vector<int> &sa, const vector<int> &rank, int offset, int n, vector<int> &out)
+{
+    int range = n + 1;
+    vector<int> count(range, 0);
+
+    for (int i = 0; i < n; i++)
+    {
+        int key = (sa[i] + offset < n) ? rank[sa[i] + offset] + 1 : 0;
+        count[key]++;
+    }
+
+    for (int i = 1; i < range; i++)
+        count[i] += count[i - 1];
+
+    for (int i = n - 1; i >= 0; i--)
+    {
+        int key = (sa[i] + offset < n) ? rank[sa[i] + offset] + 1 : 0;
+        out[--count[key]] = sa[i];
+    }
+}
+
+vector<int> buildSuffixArray(string s)
+{
+    s += '$';
+    const int n = s.size();
+    vector<int> sa(n), rank(n), temp(n);
+    iota(sa.begin(), sa.end(), 0);
+    sort(sa.begin(), sa.end(), [&](int i, int j)
+         { return s[i] < s[j]; });
+
+    rank[sa[0]] = 0;
+    for (int i = 1; i < n; i++)
+    {
+        rank[sa[i]] = rank[sa[i - 1]] + (s[sa[i]] != s[sa[i - 1]]);
+    }
+
+    for (int k = 1; k < n; k *= 2)
+    {
+        vector<int> sa2(n);
+        countingSort(sa, rank, k, n, sa2);
+        countingSort(sa2, rank, 0, n, sa);
+
+        temp[sa[0]] = 0;
+        for (int i = 1; i < n; i++)
+        {
+            int prev1 = rank[sa[i - 1]];
+            int prev2 = (sa[i - 1] + k < n) ? rank[sa[i - 1] + k] : -1;
+            int curr1 = rank[sa[i]];
+            int curr2 = (sa[i] + k < n) ? rank[sa[i] + k] : -1;
+            temp[sa[i]] = temp[sa[i - 1]] + ((curr1 != prev1 || curr2 != prev2) ? 1 : 0);
+        }
+        rank = temp;
+        if (rank[sa[n - 1]] == n - 1)
+            break;
+    }
+    return sa;
+}
+
+int main()
+{
+    string s;
+    cin >> s;
+
+    const int n = s.size();
+
+    vector<int> suffStart = buildSuffixArray(s);
+
+    int k = 0;
+    int pow2 = 1;
+
+    vector<int> hashers = {2, 31};
+    const int cntHash = hashers.size();
+
+    vector<vector<ll>> prefHash(cntHash, vector<ll>(n, 0)), suffHash(cntHash, vector<ll>(n, 0));
+    vector<vector<ll>> powHash(cntHash, vector<ll>(n, 0));
+
+    for (int i = 0; i < cntHash; i++)
+    {
+        prefHash[i][0] = s[0] - 'a';
+        suffHash[i][n - 1] = s[n - 1] - 'a';
+        powHash[i][0] = 1;
+        for (int j = 1; j < n; j++)
+        {
+            prefHash[i][j] = (prefHash[i][j - 1] * hashers[i] % MOD + s[j] - 'a') % MOD;
+            suffHash[i][n - j - 1] = (suffHash[i][n - j] * hashers[i] % MOD + s[n - j - 1] - 'a') % MOD;
+            powHash[i][j] = powHash[i][j - 1] * hashers[i] % MOD;
+        }
+    }
+
+    auto getHash = [&](int l, int r, int hasherIdx)
+    {
+        int hash = prefHash[hasherIdx][r] - (l == 0 ? 0 : prefHash[hasherIdx][l - 1] * powHash[hasherIdx][r - l + 1] % MOD);
+        if (hash < 0)
+            (hash += MOD) %= MOD;
+
+        return hash;
+    };
+
+    auto getReverseHash = [&](int l, int r, int hasherIdx)
+    {
+        int hash = suffHash[hasherIdx][l] - (r == n - 1 ? 0 : suffHash[hasherIdx][r + 1] * powHash[hasherIdx][r - l + 1] % MOD);
+        if (hash < 0)
+            (hash += MOD) %= MOD;
+
+        return hash;
+    };
+
+    auto ok = [&](int &idx, vector<vector<ll>> &tHash, string &t)
+    {
+        const int m = tHash[0].size();
+
+        // find till what length they are equal
+        int l = 1, r = min(n - idx, m);
+        while (l <= r)
+        {
+            int mid = (l + r) >> 1;
+            int equal = 1;
+            for (int i = 0; i < cntHash; i++)
+            {
+                if (getHash(idx, idx + mid - 1, i) != tHash[i][mid - 1])
+                {
+                    equal = 0;
+                    break;
+                }
+            }
+
+            if (equal)
+                l = mid + 1;
+            else
+                r = mid - 1;
+        }
+
+        int len = l - 1;
+        if (len == m)
+            return 0;
+
+        if (idx + len == n)
+            return 1;
+
+        if (s[idx + len] < t[len])
+            return 1;
+
+        return -1;
+    };
+
+    int q;
+    cin >> q;
+    while (q--)
+    {
+        string t;
+        cin >> t;
+
+        const int m = t.size();
+        vector<vector<ll>> tHash(cntHash, vector<ll>(m, 0));
+        for (int i = 0; i < cntHash; i++)
+        {
+            tHash[i][0] = t[0] - 'a';
+            for (int j = 1; j < m; j++)
+            {
+                tHash[i][j] = (tHash[i][j - 1] * hashers[i] % MOD + t[j] - 'a') % MOD;
+            }
+        }
+
+        int good = 0;
+        int l = 0, r = n;
+        while (l <= r)
+        {
+            int mid = (l + r) >> 1;
+            // check if suffix[mid] contains this t
+            // if contains then 0 (t = bab, suff = babat)
+            //  if slightly bigger then 1 (t = bab, suff = baa)
+            //  if slightly smaller then -1 (t= bab, suff = bac)
+            //  but if (t = bab, suff = ba), then also 1
+
+            int res = ok(suffStart[mid], tHash, t);
+            if (res == 0)
+            {
+                good = 1;
+                break;
+            }
+            else if (res == 1)
+                l = mid + 1;
+            else
+                r = mid - 1;
+        }
+
+        cout << (good ? "YES\n" : "NO\n");
+    }
+}
