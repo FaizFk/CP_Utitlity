@@ -63,6 +63,9 @@ vector<int> buildSuffixArray(string s)
         if (rank[sa[n - 1]] == n - 1)
             break;
     }
+
+    //This line is added to erase that $sign
+    sa.erase(sa.begin());
     return sa;
 }
 
@@ -172,7 +175,7 @@ int main()
         }
 
         int good = 0;
-        int l = 0, r = n;
+        int l = 0, r = n-1;
         while (l <= r)
         {
             int mid = (l + r) >> 1;
