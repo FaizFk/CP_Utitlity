@@ -1,0 +1,66 @@
+int N = n;
+vector<int> visited(n, 0);
+int centroid = 0;
+// centroid is when all children size is less than <= N/2 (N keeps changing)
+auto dfs_centroid = [&](auto &&dfs_centroid, int u, int par) -> int
+{
+    if (visited[u])
+        return 0;
+
+    int su = 1;
+    int ok = 1;
+    for (int v : adj[u])
+    {
+        if (v == par)
+            continue;
+
+        int sv = dfs_centroid(dfs_centroid, v, u);
+        if (sv > N / 2)
+            ok = 0;
+        su += sv;
+    }
+
+    if (su < N / 2)
+        ok = 0;
+
+    if (ok)
+        centroid = u;
+    return su;
+};
+
+auto dfs_size = [&](auto &&dfs_size, int u, int par)
+{
+    if (visited[u])
+        return 0;
+
+    int sz = 1;
+    for (int v : adj[u])
+    {
+        if (v == par)
+            continue;
+        sz += dfs_size(dfs_size, v, u);
+    }
+    return sz;
+};
+
+auto calculate = [&](int node)
+{
+    return 0;
+};
+
+auto dfs = [&](auto &&dfs, int u) -> void
+{
+    N = dfs_size(dfs_size, u, -1);
+    dfs_centroid(dfs_centroid, u, -1);
+    visited[centroid] = 1;
+
+    // calculate all path with centroid as intermediate
+    calculate(centroid);
+
+    for (int v : adj[centroid])
+    {
+        if (!visited[v])
+            dfs(dfs, v);
+    }
+};
+dfs(dfs, 0);
