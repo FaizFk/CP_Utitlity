@@ -1,0 +1,54 @@
+//Find k-th permutation of string s (Given s should be sorted)
+//n, k <= 1e5 (may be more)
+
+string kthSmallestString(string s, int k)
+{
+    if(k==1)
+        return s;
+
+    const int m = s.size();
+    vector<int> freq(26, 0);
+    
+    int tot = 1;
+    for(int i=m-1;i>=0;i--)
+    {
+        freq[s[i]-'a']++;
+        int curr = tot;
+        int prev = s[i]-'a';
+        //hence fixing [0...i-1] prefix
+        //let'a try letter j at postion i
+        for(int j = prev+1;j<26;j++)
+        {
+            if(freq[j]==0)
+                continue;
+            
+            //moving character j to i-th postion
+            //so instead of /freq[j]! it will be /(freq[j]-1)!
+            //it's like freq[j] is being multiplied
+            curr*=freq[j];
+
+            //having the prev character brought to some postion
+            //before /(freq[prev]-1)! but now it should be /freq[prev]!
+            //it like /freq[prev]
+            curr/=freq[prev];
+
+            if(tot+curr>=k)
+            {
+                string ns = s.substr(i+1);
+                //now place s[i], appropriately (sorted) in ns
+                for(int f = ns.size()-1;f>=0;f--)
+                {
+                    if(ns[f]<j+'a')
+                        ns[f+1] = ns[f];
+
+                }
+                ns[0] = s[i];
+                return s.substr(0, i) + (char)(j+'a') + kthSmallestString(ns, k-tot);
+            }
+            prev = j;
+            tot+=curr;
+        }
+    }
+
+    return "";
+}
