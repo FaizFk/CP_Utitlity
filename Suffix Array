@@ -1,0 +1,60 @@
+void countingSort(const vector<int> &sa, const vector<int> &rank, int offset, int n, vector<int> &out)
+{
+    int range = n + 1;
+    vector<int> count(range, 0);
+
+    for (int i = 0; i < n; i++)
+    {
+        int key = (sa[i] + offset < n) ? rank[sa[i] + offset] + 1 : 0;
+        count[key]++;
+    }
+
+    for (int i = 1; i < range; i++)
+        count[i] += count[i - 1];
+
+    for (int i = n - 1; i >= 0; i--)
+    {
+        int key = (sa[i] + offset < n) ? rank[sa[i] + offset] + 1 : 0;
+        out[--count[key]] = sa[i];
+    }
+}
+
+vector<int> buildSuffixArray(string s)
+{
+    s += '$';
+    const int n = s.size();
+    vector<int> sa(n), rank(n), temp(n);
+    iota(sa.begin(), sa.end(), 0);
+    sort(sa.begin(), sa.end(), [&](int i, int j)
+         { return s[i] < s[j]; });
+
+    rank[sa[0]] = 0;
+    for (int i = 1; i < n; i++)
+    {
+        rank[sa[i]] = rank[sa[i - 1]] + (s[sa[i]] != s[sa[i - 1]]);
+    }
+
+    for (int k = 1; k < n; k *= 2)
+    {
+        vector<int> sa2(n);
+        countingSort(sa, rank, k, n, sa2);
+        countingSort(sa2, rank, 0, n, sa);
+
+        temp[sa[0]] = 0;
+        for (int i = 1; i < n; i++)
+        {
+            int prev1 = rank[sa[i - 1]];
+            int prev2 = (sa[i - 1] + k < n) ? rank[sa[i - 1] + k] : -1;
+            int curr1 = rank[sa[i]];
+            int curr2 = (sa[i] + k < n) ? rank[sa[i] + k] : -1;
+            temp[sa[i]] = temp[sa[i - 1]] + ((curr1 != prev1 || curr2 != prev2) ? 1 : 0);
+        }
+        rank = temp;
+        if (rank[sa[n - 1]] == n - 1)
+            break;
+    }
+
+    //This line is added to erase that $sign
+    sa.erase(sa.begin());
+    return sa;
+}
