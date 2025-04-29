@@ -1,0 +1,53 @@
+// For lps
+//|xxxx..xxxx|0...|xxxx..xxxx|0
+//           len              i
+// if not equal
+//|xxxx|0.xxxx....xxxx..|xxxx|0
+//     len                    i
+
+vector<int> getLps(string &s)
+{
+    const int n = s.size();
+
+    vector<int> lps(n, 0);
+    int len = 0, i = 1;
+
+    while (i < n)
+    {
+        if (s[i] == s[len])
+        {
+            lps[i] = 1 + len;
+            i++, len++;
+        }
+        else
+        {
+            if (len == 0)
+                i++;
+            else
+                len = lps[len - 1];
+        }
+    }
+
+    return lps;
+}
+
+// For z array
+// Just watch Paul Maverin z-Algo video
+vector<int> getZ(string &s)
+{
+    const int n = s.size();
+    vector<int> z(n, 0);
+
+    int l = 0;
+    for (int i = 1; i < n; i++)
+    {
+        z[i] = max(0, min(z[i - l], l + z[l] - i));
+        while (i + z[i] < n && s[z[i]] == s[i + z[i]])
+            z[i]++;
+
+        if (i + z[i] > l + z[l])
+            l = i;
+    }
+
+    return z;
+}
