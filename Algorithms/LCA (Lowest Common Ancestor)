@@ -1,9 +1,9 @@
-const int LOG = 30;
-vector<vector<int>> pow2par(LOG, vector<int>(n + 1, 0));
+const int LOG = 25;
+vector<vector<int>> pow2par(LOG, vector<int>(n, 0));
 //NOTE: pow2par[0][u] should be initialized by YOU!!
 for (int i = 1; i < LOG; i++)
 {
-    for (int u = 1; u <= n; u++)
+    for (int u = 0; u < n; u++)
     {
         pow2par[i][u] = pow2par[i - 1][pow2par[i - 1][u]];
     }
@@ -12,12 +12,12 @@ for (int i = 1; i < LOG; i++)
 auto findLCA = [&](int u, int v)
 {
     // we are assuming u is down and v is up
-    if (dist[u] < dist[v])
+    if (level[u] < level[v])
         swap(u, v);
 
     for (int i = LOG - 1; i >= 0; i--)
     {
-        if (dist[u] - (1 << i) >= dist[v])
+        if (level[u] - (1 << i) >= level[v])
             u = pow2par[i][u];
     }
 
@@ -29,7 +29,7 @@ auto findLCA = [&](int u, int v)
         if (pow2par[i][u] != pow2par[i][v])
         {
             u = pow2par[i][u];
-            v = pow2par[i][u];
+            v = pow2par[i][v];
         }
     }
     return pow2par[0][u];
