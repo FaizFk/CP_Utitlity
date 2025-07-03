@@ -1,3 +1,5 @@
+//TODO: Use s[i]-'a' + 1 instead of s[i]-'a'
+
 const int cntHash = 2;
 vector<int> hashers = {2, 31};
 vector<vector<ll>> prefHash(cntHash, vector<ll>(n, 0)), suffHash(cntHash, vector<ll>(n, 0));
