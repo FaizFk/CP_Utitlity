@@ -50,6 +50,8 @@ auto insert = [&](int idx)
     int x = a[idx];
     int f = freq[x];
     bucket[f].erase(itPos[x]);
+    //total operations = n*sqrt(n)
+    //each element changes bucket, average sqrt(n) times (why? cause n*sqrt(n)/n = sqrt(n))
     if(x == minInBucket[f])
     {
         int mini = cntr;
@@ -73,6 +75,8 @@ auto remove = [&](int idx)
     int x = a[idx];
     int f = freq[x];
     bucket[f].erase(itPos[x]);
+    //total operations = n*sqrt(n)
+    //each element changes bucket, average sqrt(n) times (why? cause n*sqrt(n)/n = sqrt(n))
     if(x == minInBucket[f])
     {
         int mini = cntr;
