@@ -1,0 +1,45 @@
+//This may or may not need some corrections (i guess)
+
+int timer = 0;
+vector<int> inTime(n, -1), lowTime(n, -1);
+auto dfsT = [&](auto &&dfsT, int u, int par) -> void
+{
+    inTime[u] = timer;
+    lowTime[u] = timer;
+    timer++;
+
+    for (auto [v, idx] : adj[u])
+    {
+        if (v == par)
+            continue;
+
+        if (inTime[v] == -1)
+            dfsT(dfsT, v, u);
+
+        lowTime[u] = min(lowTime[u], lowTime[v]);
+    }
+};
+dfsT(dfsT, 0, -1);
+
+// modify this array to store (u, v) instead
+vector<int> bridges;
+for (int u = 0; u < n; u++)
+{
+    for (auto [v, idx] : adj[u])
+    {
+        if (lowTime[v] > inTime[u])
+        {
+            bridges.push_back(idx);
+        }
+    }
+}
+
+// inTime[u]: normal dfs time
+// lowTime[u]: minimum of descendants lowTime[v] except from parent in dfs tree
+//             (Note: parent will update it's lowTime when u has completed it's traversal)
+//              (hence keeping the definition :] )
+//
+// now check if (u, v) is bridge
+// if we remove edge between u and v, then v will check it's lowTime[v]
+// if lowTime[v] <= inTime[u], then we can claim there is path from v to u, hence not a bridge
+// as we can first reach a descendant of v in lowTime[v] and then reach u from that descendant
