@@ -1,0 +1,42 @@
+vector<int> getDiamPath(vector<vector<int>> &adj)
+{
+    const int n = adj.size();
+
+    vector<int> parent(n, -1);
+    int maxLen = -1;
+    int maxPoint = -1;
+    auto dfs = [&](auto &&dfs, int u, int par, int pathLen)->void
+    {
+        parent[u] = par;
+        if (pathLen > maxLen)
+        {
+            maxLen = pathLen;
+            maxPoint = u;
+        }
+
+        for (int v : adj[u])
+        {
+            if (v == par)
+                continue;
+
+            dfs(dfs, v, u, pathLen + 1);
+        }
+    };
+
+    dfs(dfs, 0, -1, 0);
+    int pointA = maxPoint;
+
+    maxLen = 0;
+    dfs(dfs, maxPoint, -1, 0);
+    int pointB = maxPoint;
+
+    vector<int> path;
+    while (pointB != pointA)
+    {
+        path.push_back(pointB);
+        pointB = parent[pointB];
+    }
+    path.push_back(pointB);
+
+    return path;
+}
