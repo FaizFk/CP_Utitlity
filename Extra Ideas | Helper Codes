@@ -1,0 +1,16 @@
+// TRAVERSING DIAGONALS: If you want to traverse on diagonals on n*m matrix (note below are the other diagonals the right-side Diagonals)
+for(int diag = 0;diag<=n+m-2;diag++)
+{
+    int startRow = max(0, diag-m+1);
+    int startCol = diag-startRow;
+    int endRow = min(diag, n-1);
+    int endCol = diag-endRow;
+    
+    while(startRow<=endRow)
+    {
+        cout<<a[startRow][startCol]<<' ';
+        startCol--;
+        startRow++;
+    }
+    cout<<'\n';
+}
