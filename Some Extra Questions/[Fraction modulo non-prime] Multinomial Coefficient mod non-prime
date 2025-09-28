@@ -1,0 +1,155 @@
+//In this question we had to find k!/a1!a2!...an! mod M, where M might be non-prime
+//Main steps, prime-factorize M
+//Then find r = Z mod p^e (for each prime)
+//Now we know r for each prime, then using CRT we can find final answer
+
+#include <bits/stdc++.h>
+#define ll long long
+using namespace std;
+
+// tells vp(x!) => how much power of p, x! contains
+int v(int x, int p)
+{
+    int ans = 0;
+    ll pow = p;
+    while (x / pow > 0)
+    {
+        ans += x / pow;
+        pow *= p;
+    }
+
+    return ans;
+}
+
+// a*x = 1 mod m
+// relies on formula ax+by = gcd(a, b)
+// if put b = m, and take whole mod m, then got a*x = 1 mod m
+int getInverse(int a, int m)
+{
+    int m0 = m;
+    int y = 0, x = 1;
+
+    if (m == 1)
+        return 0;
+
+    while (a > 1)
+    {
+        // q is quotient
+        int q = a / m;
+        int t = m;
+
+        // m is remainder now, process same as
+        // Euclid's algo
+        m = a % m, a = t;
+        t = y;
+
+        // Update y and x
+        y = x - q * y;
+        x = t;
+    }
+
+    // Make x positive
+    if (x < 0)
+        x += m0;
+
+    return x;
+}
+
+int main()
+{
+    int T;
+    cin >> T;
+    int M;
+    cin >> M;
+
+    int tmp = M;
+    //{p, e, p^e}
+    vector<array<int, 3>> primes;
+    for (int i = 2; i * i <= tmp; i++)
+    {
+        int cnt = 0;
+        int pow = 1;
+        while (tmp % i == 0)
+        {
+            cnt++;
+            tmp /= i;
+            pow *= i;
+        }
+
+        if (cnt > 0)
+            primes.push_back({i, cnt, pow});
+    }
+
+    if (tmp > 1)
+        primes.push_back({tmp, 1, tmp});
+
+    const int psz = primes.size();
+    const int mxm = 5050;
+    // dp[j][x]: x! by removing powers of p (j-th prime in primes) mod p^e
+    vector<vector<int>> dp(psz, vector<int>(mxm, 1));
+    for (int j = 0; j < psz; j++)
+    {
+        int p = primes[j][0], e = primes[j][1], pow = primes[j][2];
+        for (int x = 1; x < mxm; x++)
+        {
+            ll tx = x;
+            while (tx % p == 0)
+                tx /= p;
+
+            dp[j][x] = tx * dp[j][x - 1] % pow;
+        }
+    }
+
+    while (T--)
+    {
+        int n;
+        cin >> n;
+        vector<int> a(n, 0);
+        int k = 0;
+        for (int i = 0; i < n; i++)
+        {
+            cin >> a[i];
+            k += a[i];
+        }
+
+        vector<ll> rem(psz, 0);
+        for (int j = 0; j < psz; j++)
+        {
+            int p = primes[j][0], e = primes[j][1], pow = primes[j][2];
+            int vDiff = v(k, p);
+            for (int i = 0; i < n; i++)
+            {
+                vDiff -= v(a[i], p);
+            }
+
+            if (vDiff < e)
+            {
+                int vPow = 1;
+                for (int l = 0; l < vDiff; l++)
+                    vPow *= p;
+
+                ll A = dp[j][k];
+                ll B = 1;
+                for (int i = 0; i < n; i++)
+                {
+                    (B *= dp[j][a[i]]) %= pow;
+                }
+
+                int invB = getInverse(B, pow);
+
+                rem[j] = (A * invB % pow) * vPow % pow;
+            }
+        }
+
+        //Using CRT
+        int ans = 0;
+        for (int j = 0; j < psz; j++)
+        {
+            int p = primes[j][0], e = primes[j][1], pow = primes[j][2];
+            (ans += (rem[j] * (M / pow) % M) * getInverse(M / pow, pow) % M) %= M;
+        }
+
+        cout << ans << '\n';
+    }
+    return 0;
+}
